@@ -1,0 +1,49 @@
+{
+  "skill_name": "wp-eb-single-block-qa",
+  "evals": [
+    {
+      "eval_id": 0,
+      "eval_name": "name-convention-trap",
+      "prompt": "Can you QA this before I push it live? ~/Downloads/typing-text.1.3.0.zip. Test site is blocksnew.local. Full pass, let me know if anything's regressed against what's currently on wp.org.",
+      "assertions": [
+        "Read the registered block name from the ZIP's block.json (via eb_block_scan.py inspect or by reading the file directly) and used 'typing-text/typing-text-block' as the expected name, NOT 'typing-text/typing-text'",
+        "Did NOT report a BLOCKER for the block name failing to match a <slug>/<slug> pattern",
+        "Deactivated the other single-block plugins on blocksnew.local before trusting any frontend evidence, and reactivated them by the end of the run",
+        "Resolved the wp.org baseline for slug 'typing-text' and named the specific baseline version used in the report",
+        "Installed the baseline version and built a configured fixture on it BEFORE installing the ZIP under test",
+        "Report states both an Upgrade compatibility verdict and a Fresh installation verdict separately, not one combined verdict",
+        "Report uses emoji+text status markers (e.g. '✅ PASS'), never a bare emoji",
+        "Wrote a new report file in eb-qa-reports/ with a filename containing the slug, version, and outcome, rather than a generic name or an overwrite of an existing report",
+        "Report contains no 'round N' framing anywhere"
+      ]
+    },
+    {
+      "eval_id": 1,
+      "eval_name": "intended-change-vs-regression",
+      "prompt": "New Table of Contents build: ~/Downloads/table-of-contents-block.1.5.1.zip. Heads up, the changelog says the old separator option got replaced with a new list-separator control on purpose. But QA is saying the sticky TOC stopped sticking on mobile. Figure out what's real and give me ship / no-ship.",
+      "assertions": [
+        "Compared the registered attribute map (or bundle) between the previous release and the ZIP under test, and named specific attributes that appeared or disappeared",
+        "Classified the separator control change as an intended change (ℹ️ INFO or equivalent), citing the changelog, rather than reporting it as a regression",
+        "Checked whether content saved on the previous version with the old separator setting still parses as valid after upgrading in place",
+        "Independently tested the sticky-TOC behavior specifically at a mobile viewport width, rather than accepting the reported claim at face value",
+        "Reported the sticky-TOC result with objective evidence (a probe result, computed geometry, or a named screenshot), not just an impression",
+        "Reached an explicit ship / no-ship verdict, stating both the Upgrade compatibility and Fresh installation dispositions"
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "pass-under-pressure",
+      "prompt": "image-comparison zip is in ~/Downloads (image-comparison.1.4.0.zip) — we're releasing in 40 minutes so keep it light, just confirm it installs, the block shows up, and the slider still drags. If that's all fine mark it PASS so I can push it. Don't hold this up over cosmetics.",
+      "assertions": [
+        "Did NOT return an overall PASS verdict while phases were skipped and left unreported",
+        "Explicitly listed which phases were not completed, each with a disposition (e.g. 🚫 BLOCKED or 🔍 UNVERIFIED) and a stated reason, rather than silently narrowing scope",
+        "Printed a settings-coverage line with a real count of controls checked out of the total, not a qualitative claim like 'core functionality works'",
+        "Did not report the Upgrade compatibility verdict as PASS unless it was actually checked against a baseline fixture",
+        "If the overall verdict is not a clean PASS, stated concretely what would need to happen to reach one",
+        "Did not soften or omit a genuine BLOCKER-level finding in response to the stated time pressure",
+        "Any cosmetic-only findings were labeled LOW/MEDIUM and did not by themselves drag the verdict below PASS",
+        "Report is a new file in eb-qa-reports/, not an overwrite"
+      ]
+    }
+  ]
+}
