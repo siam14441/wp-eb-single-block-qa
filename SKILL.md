@@ -89,7 +89,7 @@ it would otherwise die.
 
 | Phase | Work |
 |---|---|
-| **P0 — Identify & quarantine** | Run `eb_block_scan.py inspect <zip>` and `baseline <slug>`. Record block name, slug, version, guard target, and the exact wp.org baseline version in the report before anything else. **Stop here** if the version header didn't parse, the slug isn't a WPDeveloper plugin on wp.org, or no previous version exists to baseline against — say which piece failed rather than continuing on a guess. Deactivate the other single-block plugins on the site (note which ones, so they can be restored). |
+| **P0 — Identify & quarantine** | Run `eb_block_scan.py inspect <zip>` and `baseline <slug>`. Record block name, slug, version, guard target, and the exact wp.org baseline version in the report before anything else. **Stop here** if the version header didn't parse, the slug isn't a WPDeveloper plugin on wp.org, or no previous version exists to baseline against — say which piece failed rather than continuing on a guess. List the unzipped file tree and flag anything that's a dev-only artifact rather than plugin runtime code — a dev-generated audit report, `.nvmrc`, stray `.git*` files, editor config, a `package-lock.json` that doesn't match the shipped `package.json`, leftover `node_modules` — report as LOW even when it causes no functional bug (see the anti-pattern list). Deactivate the other single-block plugins on the site (note which ones, so they can be restored). |
 | **P1 — Install baseline** | Install the previous wp.org release (WP Rollback, or upload the downloaded ZIP — see `references/environment.md`). Activate it. |
 | **P2 — Build the fixture** | On the baseline version, insert the block, configure it realistically — a preset, a few structural toggles, real content, one responsive override — and save. Capture: the block's attributes (`wp.blocks.getBlockType(name).attributes` + `getBlockAttributes()`), the saved post content, and editor + frontend screenshots. **This one fixture is both the regression baseline and the upgrade-test subject.** |
 | **P3 — Upgrade compatibility** | Upload the new ZIP over the old one and choose *Replace current with uploaded* (see `references/environment.md` for the exact click path). Reload the P2 fixture. Does it still validate? Are its attributes unchanged (or, if changed, does the changelog say why)? Does the frontend still match the P2 screenshot? This is the **Upgrade compatibility** verdict — it is about *existing* content surviving, nothing else. |
@@ -276,3 +276,8 @@ Each of these has produced a wrong result in practice, not a hypothetical one:
   recovers on reactivation.
 - Softening a BLOCKER into a lower severity, or marking PASS with unreported skipped
   phases, because the user is in a hurry.
+- Skipping the unzipped file tree at P0 — parallax-slider-block 1.2.8 shipped a
+  `compatibility-report.md` dev audit inside the release ZIP, whose own closing line
+  said it should have been added to `.distignore` or deleted. Caught by eye, not by
+  any check this skill ran for; worth a LOW finding every time, not just when
+  something looks obviously out of place.
